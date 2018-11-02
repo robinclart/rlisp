@@ -35,11 +35,16 @@ module Rlisp
         args.reduce(n) { |m, i| m - ctx.eval(i) }
       },
       map: Proc.new { |ctx, args|
-        formals = args[0]
-        body    = args[1]
-        list    = ctx.eval(args[2])
+        if args.size == 3
+          formals = args[0]
+          body    = args[1]
+          list    = ctx.eval(args[2])
 
-        fn = Function.new(formals, body)
+          fn = Function.new(formals, body)
+        else
+          fn   = ctx.eval(args.first)
+          list = ctx.eval(args.last)
+        end
 
         list.map { |item| fn.call(ctx, [item]) }
       },
