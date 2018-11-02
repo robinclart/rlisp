@@ -30,7 +30,7 @@ module Rlisp
 
         if scan(/'/)
           s = scan_until(/'/)
-          push([:string, s.delete(?")])
+          push([:string, s.delete(?')])
           next
         end
 
