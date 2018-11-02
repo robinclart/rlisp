@@ -23,6 +23,10 @@ module Rlisp
         return args
       end
 
+      if args.empty?
+        return []
+      end
+
       key  = args.shift
       fn   = get(key)
 
