@@ -16,7 +16,7 @@ module Rlisp
         spec = args[0]
         list = ctx.eval(args[1])
 
-        spec % list.map { |arg| ctx.eval(arg) }
+        spec % list
       },
       def: Proc.new { |ctx, args|
         if args.size == 3
