@@ -12,7 +12,9 @@ module Rlisp
       until @tokens.empty?
         t = consume
 
-        if type?(t, :start_list)
+        if type?(t, :comment)
+          next
+        elsif type?(t, :start_list)
           trees << parse_list
         elsif simple_value?(t)
           trees << t.clone
@@ -35,6 +37,8 @@ module Rlisp
 
         if type?(t, :end_list)
           break
+        elsif type?(t, :comment)
+          next
         elsif type?(t, :start_list)
           children << parse_list
           next

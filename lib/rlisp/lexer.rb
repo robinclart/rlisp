@@ -14,6 +14,7 @@ module Rlisp
 
         break if eos?
 
+        next if lexeme :comment, %r/#/, discard_match_and_keep_until_eol: true
         next if lexeme :start_list, %r/\(/
         next if lexeme :end_list, %r/\)/
         next if lexeme :lambda, %r/->/
