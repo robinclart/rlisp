@@ -1,14 +1,22 @@
 module Rlisp
   class Function
     NATIVE = {
+      capture: Proc.new { |ctx, args|
+        capture_ctx = Context.new(env: {}, outer: ctx, buffer: "")
+
+        capture_ctx.eval(args[0])
+
+        capture_ctx.buffer
+      },
       display: Proc.new { |ctx, args|
-        ctx.buffer << args.map { |arg| ctx.eval(arg) }.join
+        ctx.buffer << ctx.eval(args[0]).to_s
         nil
       },
       format: Proc.new { |ctx, args|
-        specification = args.shift
+        spec = args[0]
+        list = ctx.eval(args[1])
 
-        specification % args.map { |arg| ctx.eval(arg) }
+        spec % list.map { |arg| ctx.eval(arg) }
       },
       def: Proc.new { |ctx, args|
         if args.size == 3
@@ -41,12 +49,16 @@ module Rlisp
         Function.new(formals, body)
       },
       add: Proc.new { |ctx, args|
-        n = ctx.eval(args.shift)
-        args.reduce(n) { |memo, arg| memo + ctx.eval(arg) }
+        j = ctx.eval(args[0])
+        k = ctx.eval(args[1])
+
+        j + k
       },
       sub: Proc.new { |ctx, args|
-        n = ctx.eval(args.shift)
-        args.reduce(n) { |memo, arg| m - ctx.eval(arg) }
+        j = ctx.eval(args[0])
+        k = ctx.eval(args[1])
+
+        j - k
       },
       map: Proc.new { |ctx, args|
         if args.size == 3
@@ -62,6 +74,9 @@ module Rlisp
 
         list.map { |arg| fn.call(ctx, [arg]) }
       },
+      "string-to-integer": Proc.new { |ctx, args|
+        Integer(ctx.eval(args[0]))
+      },
     }
 
     def initialize(formals, body)
@@ -72,7 +87,7 @@ module Rlisp
     attr_reader :formals, :body
 
     def call(outer_ctx, args)
-      ctx = Context.new({}, outer_ctx, outer_ctx.buffer)
+      ctx = Context.new(env: {}, outer: outer_ctx, buffer: outer_ctx.buffer)
 
       formals.each_with_index do |arg, index|
         ctx.env[arg] = outer_ctx.eval(args[index])

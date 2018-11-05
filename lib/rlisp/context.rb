@@ -1,6 +1,6 @@
 module Rlisp
   class Context
-    def initialize(env = {}, outer = nil, buffer = "")
+    def initialize(env: {}, outer: nil, buffer: "")
       @buffer = buffer
       @env    = env
       @outer  = outer
