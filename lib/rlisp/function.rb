@@ -2,37 +2,51 @@ module Rlisp
   class Function
     NATIVE = {
       display: Proc.new { |ctx, args|
-        ctx.buffer << args.map { |i| ctx.eval(i) }.join
+        ctx.buffer << args.map { |arg| ctx.eval(arg) }.join
         nil
       },
       format: Proc.new { |ctx, args|
         specification = args.shift
 
-        specification % args.map { |i| ctx.eval(i) }
+        specification % args.map { |arg| ctx.eval(arg) }
       },
       def: Proc.new { |ctx, args|
-        ctx.env[args.first] = ctx.eval(args.last)
+        if args.size == 3
+          key     = args[0]
+          formals = args[1]
+          body    = args[2]
+
+          fn = Function.new(formals, body)
+
+          ctx.env[key] = fn
+        else
+          key = args[0]
+          fn  = ctx.eval(args[1])
+
+          ctx.env[key] = fn
+        end
+
         args.first
       },
       list: Proc.new { |ctx, args|
-        args.map { |i| ctx.eval(i) }
+        args.map { |arg| ctx.eval(arg) }
       },
       quote: Proc.new { |ctx, args|
         args
       },
       lambda: Proc.new { |ctx, args|
-        formals = args.first
-        body    = args.last
+        formals = args[0]
+        body    = args[1]
 
         Function.new(formals, body)
       },
       add: Proc.new { |ctx, args|
         n = ctx.eval(args.shift)
-        args.reduce(n) { |m, i| m + ctx.eval(i) }
+        args.reduce(n) { |memo, arg| memo + ctx.eval(arg) }
       },
       sub: Proc.new { |ctx, args|
         n = ctx.eval(args.shift)
-        args.reduce(n) { |m, i| m - ctx.eval(i) }
+        args.reduce(n) { |memo, arg| m - ctx.eval(arg) }
       },
       map: Proc.new { |ctx, args|
         if args.size == 3
@@ -42,11 +56,11 @@ module Rlisp
 
           fn = Function.new(formals, body)
         else
-          fn   = ctx.eval(args.first)
-          list = ctx.eval(args.last)
+          fn   = ctx.eval(args[0])
+          list = ctx.eval(args[1])
         end
 
-        list.map { |item| fn.call(ctx, [item]) }
+        list.map { |arg| fn.call(ctx, [arg]) }
       },
     }
 
