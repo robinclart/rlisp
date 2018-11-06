@@ -8,6 +8,9 @@ source = <<-SOURCE
 (def div (content)
   (tag "div" content))
 
+(def div (content more-content)
+  (tag "div" (format "%s%s" (list content more-content))))
+
 (div "hello")
 SOURCE
 

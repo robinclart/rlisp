@@ -8,6 +8,7 @@ module Rlisp
   require "rlisp/interpreter"
   require "rlisp/function"
   require "rlisp/context"
+  require "rlisp/native"
   require "rlisp/version"
 
   def self.eval(source, buffer = $stdout)

@@ -1,6 +1,6 @@
 module Rlisp
   class Context
-    def initialize(env: {}, outer: nil, buffer: "")
+    def initialize(env: {}, outer: Native.new, buffer: "")
       @buffer = buffer
       @env    = env
       @outer  = outer
@@ -8,8 +8,16 @@ module Rlisp
 
     attr_reader :buffer, :env
 
-    def get(key)
-      @env[key] || Function::NATIVE[key] || (@outer && @outer.get(key))
+    def get(key, arity: nil)
+      if arity
+        function_name = Function.qualified_name(key, arity)
+        @env.fetch(function_name) { @outer.get(key, arity: arity) || get(key) }
+      else
+        @env.fetch(key) { @outer.get(key) }
+      end
+    end
+
+    def get_function(key, arity)
     end
 
     def eval(interpretation)
@@ -27,10 +35,14 @@ module Rlisp
         return []
       end
 
-      key  = args.shift
-      fn   = get(key)
+      key = args.shift
+      fn  = get(key, arity: args.size)
 
-      fn.call(self, args)
+      unless fn
+        raise Error, "#{key}/#{args.size} could not be found"
+      end
+
+      fn.call(self, *args)
     end
   end
 end
